@@ -1,6 +1,6 @@
 import time
 from hazm import *
-import json
+import json, jsonf
 import pandas as pd
 
 
@@ -14,6 +14,7 @@ class farsi_analyzer():
         normalizer = Normalizer()
         main_passage = normalizer.normalize(main_passage)
         main_passage = word_tokenize(main_passage)
+        main_passage1 = main_passage.copy()
         lemmatizer = Lemmatizer()
         stemmer = Stemmer()
 
@@ -55,18 +56,24 @@ class farsi_analyzer():
 
             if length == 1:
                 count = len(dic_of_words[statement1][0])
+                for i in dic_of_words[statement1][0]: main_passage1[i] = '*'
 
             elif length == 2:
                 for i in range(len(dic_of_words[statement1][0])):
                     for j in range(len(dic_of_words[statement1][1])):
-                        if dic_of_words[statement1][0][i] < dic_of_words[statement1][1][j]: count += 1
+                        if dic_of_words[statement1][0][i] < dic_of_words[statement1][1][j]:
+                            count += 1
+                            for k in [dic_of_words[statement1][0][i],dic_of_words[statement1][1][j]]: main_passage1[k] = '*'
 
             elif length == 3:
                 for i in range(len(dic_of_words[statement1][0])):
                     for j in range(len(dic_of_words[statement1][1])):
                         for k in range(len(dic_of_words[statement1][2])):
                             if (dic_of_words[statement1][0][i] < dic_of_words[statement1][1][j]) & (
-                                    dic_of_words[statement1][1][j] < dic_of_words[statement1][2][k]): count += 1
+                                    dic_of_words[statement1][1][j] < dic_of_words[statement1][2][k]):
+                                count += 1
+                                for l in [dic_of_words[statement1][0][i], dic_of_words[statement1][1][j], dic_of_words[statement1][2][k]]:
+                                    main_passage1[l] = '*'
 
             elif length == 4:
                 for i in range(len(dic_of_words[statement1][0])):
@@ -75,7 +82,11 @@ class farsi_analyzer():
                             for l in range(len(dic_of_words[statement1][3])):
                                 if (dic_of_words[statement1][0][i] < dic_of_words[statement1][1][j]) & (
                                         dic_of_words[statement1][1][j] < dic_of_words[statement1][2][k]) & (
-                                        dic_of_words[statement1][2][k] < dic_of_words[statement1][3][l]): count += 1
+                                        dic_of_words[statement1][2][k] < dic_of_words[statement1][3][l]):
+                                    count += 1
+                                    for m in [dic_of_words[statement1][0][i], dic_of_words[statement1][1][j],
+                                              dic_of_words[statement1][2][k], dic_of_words[statement1][3][l]]:
+                                        main_passage1[m] = '*'
 
             elif length == 5:
                 for i in range(len(dic_of_words[statement1][0])):
@@ -86,12 +97,24 @@ class farsi_analyzer():
                                     if (dic_of_words[statement1][0][i] < dic_of_words[statement1][1][j]) & (
                                             dic_of_words[statement1][1][j] < dic_of_words[statement1][2][k]) \
                                             & (dic_of_words[statement1][2][k] < dic_of_words[statement1][3][l]) & (
-                                            dic_of_words[statement1][3][l] < dic_of_words[statement1][4][
-                                        m]): count += 1
+                                            dic_of_words[statement1][3][l] < dic_of_words[statement1][4][m]):
+                                        count += 1
+                                        for n in [dic_of_words[statement1][0][i], dic_of_words[statement1][1][j],
+                                                  dic_of_words[statement1][2][k], dic_of_words[statement1][3][l], dic_of_words[statement1][4][m]]:
+                                            main_passage1[n] = '*'
 
             word_repeatation[statement1] = count
 
-        return word_repeatation
+        returned_text = ' '.join(main_passage1)
+        #returned_text_file = json.dumps(returned_text, indent=4, ensure_ascii=False)
+        #statement_repeatation = json.dumps(word_repeatation, indent=4, ensure_ascii=False)
+        with open("sample1.json", "w", encoding='utf-8') as outfile1:
+            outfile1.write(json.dumps(returned_text, ensure_ascii=False))
+
+        with open("sample.json", "w", encoding='utf-8') as outfile:
+            outfile.write(json.dumps(word_repeatation, ensure_ascii=False))
+
+        return outfile, outfile1
 
     def add_statement(self, list_of_statements, new_statement):
         list_of_statements.append(new_statement)
